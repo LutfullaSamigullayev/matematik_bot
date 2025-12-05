@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { AuthModule } from './module/auth/auth.module';
-import { PostModule } from './module/post/post.module';
+import { BotModule } from './bot/bot.module';
 
 @Module({
   imports: [
@@ -10,8 +9,7 @@ import { PostModule } from './module/post/post.module';
 
     MongooseModule.forRoot(process.env.MONGO_URI as string),
 
-    AuthModule,
-    PostModule
+    BotModule
   ],
   controllers: [],
   providers: [],
