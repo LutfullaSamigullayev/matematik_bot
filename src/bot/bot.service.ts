@@ -22,7 +22,7 @@ export class BotService {
 
   private handleStartCommand() {
     this.bot.onText(/\/start/, async (msg) => {
-      const chatId: number = msg.chat.id;
+      const chatId = String(msg.chat.id);
       const firstName: string = msg.from?.first_name || "";
 
       const foundedUser = await this.botModel.findOne({ chatId });
@@ -115,7 +115,14 @@ export class BotService {
 
       const user = await this.botModel.findOne({ chatId });
 
-      if (!user || user.isTesting) return;
+      if (!user) return;
+
+      if (!user.isTesting) {
+        return this.bot.sendMessage(
+          chatId,
+          "Testni boshlash uchun /test buyrug'ini bering."
+        );
+      }
 
       const userAnswer = Number(text);
 
@@ -138,7 +145,7 @@ export class BotService {
       if (user.testStep >= 10) {
         await this.bot.sendMessage(
           chatId,
-          `Test tugadi! \nSizning natijangiz: ${user.testScore}/10`
+          `Test tugadi! \nSizning natijangiz: ${user.testScore}/10 \nAgar yana testdan o'tmoqchi bo'lsangiz /test buyrug'ini bering.`
         );
 
         user.isTesting = false;
