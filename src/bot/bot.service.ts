@@ -17,6 +17,7 @@ export class BotService {
   onModuleInit() {
     this.handleStartCommand();
     this.handleTestCommand();
+    this.handleAnswerListener();
   }
 
   private handleStartCommand() {
@@ -105,4 +106,55 @@ export class BotService {
     });
   }
 
+  private handleAnswerListener() {
+    this.bot.on("message", async (msg) => {
+      const chatId = String(msg.chat.id);
+      const text = msg.text?.trim();
+
+      if (text?.startsWith("/")) return;
+
+      const user = await this.botModel.findOne({ chatId });
+
+      if (!user || user.isTesting) return;
+
+      const userAnswer = Number(text);
+
+      if (isNaN(userAnswer)) {
+        return this.bot.sendMessage(chatId, "Faqat son kiriting!");
+      }
+
+      if (userAnswer === user.currentAnswer) {
+        user.testScore += 1;
+        await this.bot.sendMessage(chatId, "To'g'ri 🎉🎆", {
+          parse_mode: "HTML", // yoki "MarkdownV2"
+        });
+      } else {
+        await this.bot.sendMessage(
+          chatId,
+          `Noto'g'ri! \nTo'g'ri javob: ${user.currentAnswer}`
+        );
+      }
+
+      if (user.testStep >= 10) {
+        await this.bot.sendMessage(
+          chatId,
+          `Test tugadi! \nSizning natijangiz: ${user.testScore}/10`
+        );
+
+        user.isTesting = false;
+        user.currentAnswer = null;
+        user.currentQuestion = null;
+        await user.save();
+        return;
+      }
+
+      user.testStep += 1;
+      const { question, answer } = this.generateQuestion();
+      user.currentQuestion = question;
+      user.currentAnswer = answer;
+      await user.save();
+
+      this.bot.sendMessage(chatId, `№ ${user.testStep}-savol: \n${question}`);
+    });
+  }
 }
