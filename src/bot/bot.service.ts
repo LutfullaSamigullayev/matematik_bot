@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable  } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Bot } from "./model/bot.schema";
 import { Model } from "mongoose";
@@ -12,7 +12,13 @@ export class BotService {
     this.bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN as string, {
       polling: true,
     });
+  }
 
+  onModuleInit() {
+    this.handleStartCommand();
+  }
+
+  private handleStartCommand() {
     this.bot.onText(/\/start/, async (msg) => {
       const chatId: number = msg.chat.id;
       const firstName: string = msg.from?.first_name || "";
@@ -33,7 +39,5 @@ export class BotService {
         );
       }
     });
-
-    
   }
 }
