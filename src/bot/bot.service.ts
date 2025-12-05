@@ -16,6 +16,7 @@ export class BotService {
 
   onModuleInit() {
     this.handleStartCommand();
+    this.handleTestCommand();
   }
 
   private handleStartCommand() {
@@ -33,7 +34,7 @@ export class BotService {
           `Matematik botga xush kelibsiz, ${firstName}!`
         );
       } else {
-        await this.bot.sendMessage(
+        this.bot.sendMessage(
           chatId,
           `Siz avval ro'yxatdan o'tgansiz, ${firstName}!`
         );
@@ -69,6 +70,39 @@ export class BotService {
       question: `${a} ${operator} ${b} = ?`,
       answer,
     };
+  }
+
+  private handleTestCommand() {
+    this.bot.onText(/\/test/, async (msg) => {
+      const chatId = String(msg.chat.id);
+      const user = await this.botModel.findOne({ chatId });
+
+      if (!user) {
+        return this.bot.sendMessage(chatId, "Siz hali ro'yxatdan o'tmagansiz!");
+      }
+
+      if (user.isTesting) {
+        return this.bot.sendMessage(
+          chatId,
+          `${user.firstName} siz hali avvalgi testni tugatmadingiz!`
+        );
+      }
+
+      user.isTesting = true;
+      user.testScore = 0;
+      user.testStep = 1;
+
+      const { question, answer } = this.generateQuestion();
+      user.currentQuestion = question;
+      user.currentAnswer = answer;
+
+      await user.save();
+
+      this.bot.sendMessage(
+        chatId,
+        `Test boshlandi! \n№ 1-savol: \n${question}`
+      );
+    });
   }
 
 }
