@@ -1,4 +1,4 @@
-import { Injectable  } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Bot } from "./model/bot.schema";
 import { Model } from "mongoose";
@@ -40,4 +40,35 @@ export class BotService {
       }
     });
   }
+
+  private generateQuestion() {
+    const a: number = Math.floor(Math.random() * 10) + 1;
+    const b: number = Math.floor(Math.random() * 10) + 1;
+
+    const operators: string[] = ["+", "-", "*"];
+    const operator: string =
+      operators[Math.floor(Math.random() * operators.length)];
+
+    let answer: number;
+
+    switch (operator) {
+      case "+":
+        answer = a + b;
+        break;
+      case "-":
+        answer = a - b;
+        break;
+      case "*":
+        answer = a * b;
+        break;
+      default:
+        throw new Error("Invalid operator!");
+    }
+
+    return {
+      question: `${a} ${operator} ${b} = ?`,
+      answer,
+    };
+  }
+
 }
