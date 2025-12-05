@@ -24,10 +24,10 @@ export class Bot {
   isTesting: boolean; 
   
   @Prop({ default: null })
-  currentQuestion: string;
+  currentQuestion: string | null;
 
   @Prop({ default: null })
-  currentAnswer: number;
+  currentAnswer: number | null;
 }
 
 
