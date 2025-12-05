@@ -3,7 +3,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 
 export type BotDocument = HydratedDocument<Bot>;
 
-@Schema()
+@Schema({versionKey: false})
 export class Bot {
   @Prop()
   chatId: string;
@@ -23,10 +23,10 @@ export class Bot {
   @Prop({ default: false })
   isTesting: boolean; 
   
-  @Prop({ default: null })
+  @Prop({ type: String, default: null })
   currentQuestion: string | null;
 
-  @Prop({ default: null })
+  @Prop({ type: Number, default: null })
   currentAnswer: number | null;
 }
 
