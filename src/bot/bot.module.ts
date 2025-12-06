@@ -2,9 +2,11 @@ import { Module } from '@nestjs/common';
 import { BotService } from './bot.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Bot, BotSchema } from './model/bot.schema';
+import { BotController } from './bot.controller';
 
 @Module({
   imports: [MongooseModule.forFeature([{ name: Bot.name, schema: BotSchema }])],
   providers: [BotService],
+  controllers: [BotController],
 })
 export class BotModule {}

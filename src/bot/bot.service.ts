@@ -2,19 +2,28 @@ import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Bot } from "./model/bot.schema";
 import { Model } from "mongoose";
-import TelegramBot from "node-telegram-bot-api";
+import TelegramBot, { Update } from "node-telegram-bot-api";
 
 @Injectable()
 export class BotService {
   private bot: TelegramBot;
 
   constructor(@InjectModel(Bot.name) private botModel: Model<Bot>) {
+    const webhookBase = process.env.WEBHOOK_BASE_URL || process.env.RENDER_EXTERNAL_URL || "";
+    const isWebhookMode = !!webhookBase;
     this.bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN as string, {
-      polling: true,
+      polling: !isWebhookMode,
     });
   }
 
-  onModuleInit() {
+  async onModuleInit() {
+    const webhookBase = process.env.WEBHOOK_BASE_URL || process.env.RENDER_EXTERNAL_URL || "";
+    if (webhookBase) {
+      const base = webhookBase.replace(/\/+$/, "");
+      const secret = process.env.TG_WEBHOOK_SECRET || (process.env.TELEGRAM_BOT_TOKEN as string);
+      await (this.bot as any).setWebHook(`${base}/webhook/${secret}`, { secret_token: secret } as any);
+    }
+
     this.handleStartCommand();
     this.handleTestCommand();
     this.handleAnswerListener();
@@ -163,5 +172,9 @@ export class BotService {
 
       this.bot.sendMessage(chatId, `№ ${user.testStep}-savol: \n${question}`);
     });
+  }
+
+  processUpdate(update: Update) {
+    (this.bot as any).processUpdate(update);
   }
 }
